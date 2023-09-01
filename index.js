@@ -1,8 +1,11 @@
 require("dotenv").config();
 
+const path = require("path");
 const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
+
+app.use(express.static("public"));
 
 // Use the MongoDB URI from the environment variable
 const uri = process.env.MONGO_URI;
@@ -50,9 +53,7 @@ db.once("open", () => {
 });
 
 app.get("/", async (req, res) => {
-  const data = await db.collection("articles").find();
-  console.log("Just got a request!");
-  res.json(data);
+  res.sendFile(path.join(__dirname, "public/images/icon-thank-you.svg"));
 });
 
 app.get("/user", (req, res) => {
