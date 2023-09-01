@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
 
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Use the MongoDB URI from the environment variable
 const uri = process.env.MONGO_URI;
