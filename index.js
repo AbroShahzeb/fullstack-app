@@ -1,7 +1,12 @@
 const express = require("express");
 const app = express();
-app.all("/", (req, res) => {
+app.get("/", (req, res) => {
   console.log("Just got a request!");
-  res.send({ message: "Its is working, woohoo!" });
+  res.json({ message: "Homepage!" });
 });
+
+app.get("/user", (req, res) => {
+  res.json({ message: "User page" });
+});
+
 app.listen(process.env.PORT || 3000);
