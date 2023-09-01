@@ -6,6 +6,7 @@ const express = require("express");
 const app = express();
 
 app.use(express.static(path.join(__dirname, "public")));
+app.set("view engine", "ejs");
 
 // Use the MongoDB URI from the environment variable
 const uri = process.env.MONGO_URI;
@@ -37,7 +38,7 @@ app.get("/post-article", async (req, res) => {
 app.get("/articles", async (req, res) => {
   try {
     const articles = await Article.find();
-    res.json(articles);
+    res.render("home", { articles: articles });
   } catch (error) {
     console.error("Error fetching articles:", error);
     res.status(500).json({ error: "Unable to fetch articles" });
