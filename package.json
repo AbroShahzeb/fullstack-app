@@ -1,30 +1,28 @@
 {
-  "name": "starter-express-api",
+  "name": "mern-auth",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "type": "module",
+  "description": "MERN authentication system",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "start:dev": "nodemon index.js",
-    "build": "echo 'running build'"
+    "start": "node backend/server.js",
+    "server": "nodemon backend/server.js",
+    "client": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AbroShahzeb/backend-api.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/AbroShahzeb/backend-api.git/issues"
-  },
-  "homepage": "https://github.com/AbroShahzeb/backend-api.git#readme",
+  "author": "Brad Traversy",
+  "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.3.1",
-    "ejs": "^3.1.9",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "mongoose": "^7.5.0"
+    "express-async-handler": "^1.2.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "concurrently": "^8.0.1",
+    "nodemon": "^2.0.22"
   }
 }
