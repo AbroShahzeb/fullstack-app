@@ -1,46 +1,43 @@
 import express from "express";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-
-import AuthRoutes from "./routes/AuthRoutes.js";
+import cors from "cors";
+dotenv.config();
 import cookieParser from "cookie-parser";
 
-dotenv.config();
+import path from "path";
+import connectDB from "./utils/db.js";
+import AuthRoutes from "./routes/AuthRoutes.js";
 
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("DB Connection Successful");
-  })
-  .catch((err) => console.log(err.message));
-
-const port = process.env.PORT || 5000;
 const app = express();
-
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    allowedHeaders: ["Content-Type", "Authoriztion"],
+    methods: ["GET", "POST", "DELETE"],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(AuthRoutes);
 app.use(cookieParser());
+const PORT = process.env.PORT || 5000;
 
-app.use("/", (req, res) => {
-  res.json("Hello from server");
+connectDB();
+
+app.use("/user", AuthRoutes);
+
+if (process.env.NODE_ENV === "production") {
+  const __dirname = path.resolve();
+  app.use(express.static(path.join(__dirname, "/frontend/dist")));
+
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"))
+  );
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running....");
+  });
+}
+
+app.listen(PORT, () => {
+  console.log(`App is listening on port ${PORT}`);
 });
-
-app.listen(port, () => console.log(`Server started on port ${port}`));
-
-// if (process.env.NODE_ENV === "production") {
-//   const __dirname = path.resolve();
-//   app.use(express.static(path.join(__dirname, "/frontend/dist")));
-
-//   app.get("*", (req, res) =>
-//     res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"))
-//   );
-// } else {
-//   app.get("/", (req, res) => {
-//     console.log("Some changes :)");
-//     res.send("API is running....");
-//   });
-// }
