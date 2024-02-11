@@ -1,6 +1,5 @@
 import fs from "fs";
-import multer from "multer";
-const upload = multer({ dest: "tmp/" });
+
 import jwt from "jsonwebtoken";
 import { randomUUID } from "crypto";
 

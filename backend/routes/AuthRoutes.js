@@ -9,7 +9,7 @@ import {
   login,
 } from "../controllers/AuthControllers.js";
 import multer from "multer";
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "tmp/" });
 
 const router = express.Router();
 
