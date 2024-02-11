@@ -15,8 +15,6 @@ const toastConfiguration = {
   progress: undefined,
 };
 
-console.log(process.env.MONGO_URI);
-
 function Register() {
   const { register, handleSubmit, reset, formState } = useForm();
   let temporaryImageURL;
