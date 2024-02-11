@@ -82,9 +82,9 @@ export const register = async (req, res) => {
     });
 
   // Delete the file from local upload folder
-  fs.unlink(path, (err, data) => {
-    if (err) console.log("An error occured while deleting file locally");
-  });
+  // fs.unlink(path, (err, data) => {
+  //   if (err) console.log("An error occured while deleting file locally");
+  // });
 
   if (error) {
     err.message = "image error";
