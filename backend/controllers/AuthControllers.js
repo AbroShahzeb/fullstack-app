@@ -203,9 +203,9 @@ export const editAccount = async (req, res) => {
     user.save();
 
     // Delete the file from local upload folder
-    fs.unlink(path, (err, data) => {
-      if (err) console.log("An error occured while deleting file locally");
-    });
+    // fs.unlink(path, (err, data) => {
+    //   if (err) console.log("An error occured while deleting file locally");
+    // });
 
     res.json("User details edited successfully");
   } catch (err) {
