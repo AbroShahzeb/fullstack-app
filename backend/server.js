@@ -11,7 +11,7 @@ import AuthRoutes from "./routes/AuthRoutes.js";
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CORS_ORIGIN,
     allowedHeaders: ["Content-Type", "Authoriztion"],
     methods: ["GET", "POST", "DELETE"],
   })
