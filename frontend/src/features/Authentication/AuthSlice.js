@@ -6,7 +6,7 @@ export const registerUser = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://shopitnow.cyclic.app/user/register",
+        "https://shopitnow.cyclic.app/user/register",
         formData,
         {
           headers: {

@@ -21,9 +21,7 @@ app.use(
     //     callback(new Error('Not allowed by CORS'));
     //   }
     // }
-    origin: "https://shopitnow.cyclic.app",
-    allowedHeaders: ["Content-Type", "Authoriztion"],
-    methods: ["GET", "POST", "DELETE"],
+    origin: "*",
   })
 );
 app.use(express.json());
