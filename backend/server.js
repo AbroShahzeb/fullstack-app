@@ -9,9 +9,19 @@ import connectDB from "./utils/db.js";
 import AuthRoutes from "./routes/AuthRoutes.js";
 
 const app = express();
+
+const allowedOrigins = ["http://example1.com", "http://example2.com"];
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    // origin: function(origin, callback) {
+    //   // Check if the request origin is in the allowedOrigins array
+    //   if (!origin || allowedOrigins.includes(origin)) {
+    //     callback(null, true);
+    //   } else {
+    //     callback(new Error('Not allowed by CORS'));
+    //   }
+    // }
+    origin: "https://shopitnow.cyclic.app",
     allowedHeaders: ["Content-Type", "Authoriztion"],
     methods: ["GET", "POST", "DELETE"],
   })
