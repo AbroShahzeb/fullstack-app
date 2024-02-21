@@ -1,51 +1,65 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 dotenv.config();
-import cookieParser from "cookie-parser";
-
-import path from "path";
-import connectDB from "./utils/db.js";
-import AuthRoutes from "./routes/AuthRoutes.js";
+import { Server } from 'socket.io';
 
 const app = express();
 
-const allowedOrigins = ["http://example1.com", "http://example2.com"];
-app.use(
-  cors({
-    // origin: function(origin, callback) {
-    //   // Check if the request origin is in the allowedOrigins array
-    //   if (!origin || allowedOrigins.includes(origin)) {
-    //     callback(null, true);
-    //   } else {
-    //     callback(new Error('Not allowed by CORS'));
-    //   }
-    // }
-    origin: "*",
-  })
-);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+import connectDB from './utils/db.js';
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+
+import quizRoutes from './routes/quizRoutes.js';
+import studentRoutes from './routes/studentRoutes.js';
+import teacherRoutes from './routes/teacherRoutes.js';
+
 const PORT = process.env.PORT || 5000;
 
+// Connect to Database
 connectDB();
 
-app.use("/user", AuthRoutes);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-if (process.env.NODE_ENV === "production") {
-  const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname, "/frontend/dist")));
+app.use(cookieParser());
 
-  app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"))
-  );
-} else {
-  app.get("/", (req, res) => {
-    res.send("API is running....");
-  });
+app.use('/api/student', studentRoutes);
+app.use('/api/teacher', teacherRoutes);
+app.use('/api/quiz', quizRoutes);
+
+app.get('/', (req, res) => {
+  res.json('Hello from the server');
+});
+
+app.use(notFound);
+app.use(errorHandler);
+
+const server = app.listen(PORT, () => console.log('App is running...'));
+
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  },
+});
+
+function timer(totalTime, interval) {
+  // Pass io and roomId
+  let time = totalTime;
+
+  const countdownInterval = setInterval(function () {
+    time--;
+    io.emit('timerUpdate', time); // Emit to room
+
+    if (time <= 0) {
+      // Improved termination
+      io.emit('timeEnd', 'Timer ended');
+      clearInterval(countdownInterval);
+    }
+  }, interval);
 }
 
-app.listen(PORT, () => {
-  console.log(`App is listening on port ${PORT}`);
+io.on('connection', () => {
+  console.log('Some client connected, hurray!');
 });
+
+timer(30, 1000);
