@@ -56,6 +56,8 @@ function timer(totalTime, interval) {
       clearInterval(countdownInterval);
     }
   }, interval);
+
+  console.log('Hello world');
 }
 
 io.on('connection', () => {
