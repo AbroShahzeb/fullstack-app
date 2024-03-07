@@ -38,3 +38,6 @@ const studentSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+const student = mongoose.model("Student", studentSchema);
+export default student;

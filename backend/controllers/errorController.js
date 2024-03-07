@@ -13,7 +13,14 @@ const handleCastError = (err) => {
 
 const handleDuplicateRecordDB = (err) => {
   const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  const message = `Duplidate field value: ${value}. Please use another value`;
+  const dupField = Object.keys(err.keyValue)[0];
+
+  let message;
+
+  if (dupField === "email")
+    message = `User with this email already exits. Please try another one.`;
+  else message = `Duplidate field value: ${value}. Please use another value`;
+
   return new AppError(message, 400);
 };
 
@@ -40,6 +47,8 @@ const sendProdError = (err, res) => {
 };
 
 const sendDevError = (err, res) => {
+  console.log(err);
+
   res.status(err.statusCode).json({
     status: err.status,
     message: err.message,
@@ -52,7 +61,7 @@ const globalErrorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
-  if (process.env.NODE_ENV === "developement") {
+  if (process.env.NODE_ENV === "development") {
     sendDevError(err, res);
   } else if (process.env.NODE_ENV === "production") {
     let error = { ...err };
@@ -66,7 +75,7 @@ const globalErrorHandler = (err, req, res, next) => {
       error = handleValidationError(err);
     }
 
-    if (error.name === "JsonWebTokenError") error = handleInvalidJWTError;
+    if (error.name === "JsonWebTokenError") error = handleInvalidJWTError();
     if (error.name === "TokenExpiredError") error = handleExpiredJWTError();
     if (error.name === "CastError") error = handleCastError(err);
 
