@@ -1,9 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAPI = process.env.SUPABASE_API;
-
-// Create a single supabase client for interacting with your database
-const supabase = createClient(supabaseUrl, supabaseAPI);
+const supabaseUrl = "https://vnhgrooffbbstuzsobgb.supabase.co";
+const supabaseKey = process.env.SUPABASE_API_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default supabase;
