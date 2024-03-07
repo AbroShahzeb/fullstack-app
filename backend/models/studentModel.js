@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import bcrypt from "bcryptjs";
 
 const studentSchema = new mongoose.Schema(
   {
@@ -38,6 +39,16 @@ const studentSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+studentSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  const salt = await bcrypt.genSalt();
+  this.password = await bcrypt.hash(this.password, salt);
+  this.passwordConfirm = undefined;
+
+  next();
+});
 
 const student = mongoose.model("Student", studentSchema);
 export default student;
