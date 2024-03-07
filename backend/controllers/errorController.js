@@ -26,6 +26,7 @@ const handleDuplicateRecordDB = (err) => {
 
 const handleValidationError = (err) => {
   const errors = Object.values(err.errors).map((el) => el.message);
+  console.log(errors);
   const message = `Invalid input data. ${errors.join(". ")}`;
   return new AppError(message, 400);
 };
@@ -35,6 +36,7 @@ const sendProdError = (err, res) => {
     res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
+      extra: undefined,
     });
   } else {
     console.error("ERROR 💥", err);
@@ -64,20 +66,20 @@ const globalErrorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV === "development") {
     sendDevError(err, res);
   } else if (process.env.NODE_ENV === "production") {
-    let error = { ...err };
+    let error = { ...err, message: err.message };
 
-    if (error.code === 11000) error = handleDuplicateRecordDB(err);
+    if (error.name === "CastError") error = handleCastError(error);
+    if (error.code === 11000) error = handleDuplicateRecordDB(error);
     if (
       error._message === "Student validation failed" ||
       error._message === "Teacher validation failed" ||
       error._message === "Quiz validation failed"
     ) {
-      error = handleValidationError(err);
+      error = handleValidationError(error);
     }
 
     if (error.name === "JsonWebTokenError") error = handleInvalidJWTError();
     if (error.name === "TokenExpiredError") error = handleExpiredJWTError();
-    if (error.name === "CastError") error = handleCastError(err);
 
     sendProdError(error, res);
   }
