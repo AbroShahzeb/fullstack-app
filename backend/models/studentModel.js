@@ -16,6 +16,10 @@ const studentSchema = new mongoose.Schema(
       unique: [true, "Student with this email already exists"],
       validate: [validator.isEmail, "Please provide a valid email address"],
     },
+    role: {
+      type: String,
+      default: "student",
+    },
     photo: {
       type: String,
     },
@@ -23,6 +27,7 @@ const studentSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password cannot be empty"],
       minlength: [8, "Password must be atleast 8 characters long"],
+      select: false,
     },
     passwordConfirm: {
       type: String,
@@ -34,6 +39,7 @@ const studentSchema = new mongoose.Schema(
         message: "Password don't match",
       },
     },
+    passwordChangedAt: Date,
   },
   {
     timestamps: true,
@@ -49,6 +55,31 @@ studentSchema.pre("save", async function (next) {
 
   next();
 });
+
+studentSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+studentSchema.methods.arePasswordsEqual = async function (
+  candidatePassword,
+  hashedPassword
+) {
+  return await bcrypt.compare(candidatePassword, hashedPassword);
+};
+
+studentSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const passwordChangeTime = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    return JWTTimestamp < passwordChangeTime;
+  }
+  return false;
+};
 
 const student = mongoose.model("Student", studentSchema);
 export default student;
