@@ -4,10 +4,12 @@ import globalErrorHandler from "./controllers/errorController.js";
 
 const app = express();
 import studentRoutes from "./routes/studentRoutes.js";
+import teacherRoutes from "./routes/teacherRoutes.js";
 
 app.use(express.json());
 
 app.use("/api/v1/students", studentRoutes);
+app.use("/api/v1/teachers", teacherRoutes);
 
 app.get("/", (req, res) => {
   res.json({

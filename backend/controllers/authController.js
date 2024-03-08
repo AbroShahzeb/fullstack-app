@@ -1,11 +1,11 @@
 import Student from "../models/studentModel.js";
+import Teacher from "../models/teacherModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import jwt from "jsonwebtoken";
 import { promisify } from "util";
 import { sendMail } from "../utils/email.js";
 import crypto from "crypto";
-import student from "../models/studentModel.js";
 
 const signToken = (id, res) => {
   const token = jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -16,83 +16,86 @@ const signToken = (id, res) => {
   return token;
 };
 
-export const signup = catchAsync(async (req, res, next) => {
-  const { name, email, password, passwordConfirm } = req.body;
+export const signup = (Model) =>
+  catchAsync(async (req, res, next) => {
+    const { name, email, password, passwordConfirm } = req.body;
 
-  const newStudent = await Student.create({
-    name,
-    email,
-    password,
-    passwordConfirm,
+    const newDocument = await Model.create({
+      name,
+      email,
+      password,
+      passwordConfirm,
+    });
+
+    const token = signToken(newDocument._id, res);
+
+    res.status(201).json({
+      status: "success",
+      token,
+    });
   });
 
-  const token = signToken(newStudent._id, res);
+export const login = (Model) =>
+  catchAsync(async (req, res, next) => {
+    const { email, password } = req.body;
 
-  res.status(201).json({
-    status: "success",
-    token,
+    if (!email || !password) {
+      return next(new AppError("Email and Password is required", 400));
+    }
+
+    const document = await Model.findOne({ email }).select("+password");
+
+    if (
+      !document ||
+      !(await document.arePasswordsEqual(password, document.password))
+    ) {
+      return next(new AppError("Invalid email or password", 401));
+    }
+
+    const token = signToken(document._id, res);
+
+    res.json({
+      status: "success",
+      token,
+    });
   });
-});
 
-export const login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+export const protect = (Model) =>
+  catchAsync(async (req, res, next) => {
+    let token;
 
-  if (!email || !password) {
-    return next(new AppError("Email and Password is required", 400));
-  }
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
 
-  const student = await Student.findOne({ email }).select("+password");
+    if (!token) {
+      return next(
+        new AppError("You are not logged in, login to perform this task")
+      );
+    }
 
-  if (
-    !student ||
-    !(await student.arePasswordsEqual(password, student.password))
-  ) {
-    return next(new AppError("Invalid email or password", 401));
-  }
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-  const token = signToken(student._id, res);
+    const currentUser = await Model.findById(decoded.id);
 
-  res.json({
-    status: "success",
-    token,
+    if (!currentUser) {
+      return next(new AppError("Student belonging to token does not exit"));
+    }
+
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next(new AppError("Password was recently changed. Login again"));
+    }
+
+    req.user = currentUser;
+    next();
   });
-});
-
-export const protect = catchAsync(async (req, res, next) => {
-  let token;
-
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  }
-
-  if (!token) {
-    return next(
-      new AppError("You are not logged in, login to perform this task")
-    );
-  }
-
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-  const currentStudent = await Student.findById(decoded.id);
-
-  if (!currentStudent) {
-    return next(new AppError("Student belonging to token does not exit"));
-  }
-
-  if (currentStudent.changedPasswordAfter(decoded.iat)) {
-    return next(new AppError("Password was recently changed. Login again"));
-  }
-
-  req.student = currentStudent;
-  next();
-});
 
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.student.role)) {
+    if (!roles.includes(req.user.role)) {
       return next(
         new AppError("You do not have permission to perform this action", 403)
       );
@@ -102,107 +105,110 @@ export const restrictTo = (...roles) => {
   };
 };
 
-export const getAllStudents = catchAsync(async (req, res, next) => {
-  const students = await Student.find().select("-__v");
+// export const getAllStudents = catchAsync(async (req, res, next) => {
+//   const students = await Student.find().select("-__v");
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      students,
-    },
-  });
-});
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       students,
+//     },
+//   });
+// });
 
-export const changePassword = catchAsync(async (req, res, next) => {
-  const { currentPassword, newPassword, newPasswordConfirm } = req.body;
+export const changePassword = (Model) =>
+  catchAsync(async (req, res, next) => {
+    const { currentPassword, newPassword, newPasswordConfirm } = req.body;
 
-  // Match the current password
-  const student = await Student.findById(req.student._id).select("+password");
+    // Match the current password
+    const user = await Model.findById(req.user._id).select("+password");
 
-  if (!student) {
-    return next(
-      new AppError("You are not logged in. Login to change password", 401)
-    );
-  }
+    if (!user) {
+      return next(
+        new AppError("You are not logged in. Login to change password", 401)
+      );
+    }
 
-  if (!(await student.arePasswordsEqual(currentPassword, student.password))) {
-    return next(new AppError("Your current password is wrong", 400));
-  }
+    if (!(await user.arePasswordsEqual(currentPassword, user.password))) {
+      return next(new AppError("Your current password is wrong", 400));
+    }
 
-  student.password = newPassword;
-  student.passwordConfirm = newPasswordConfirm;
-  await student.save();
-
-  res.status(200).json({
-    status: "success",
-    message: "Password changed successfully",
-  });
-});
-
-export const forgotPassword = catchAsync(async (req, res, next) => {
-  const { email } = req.body;
-
-  const student = await Student.findOne({ email });
-
-  if (!student) return next(new AppError("No user with this email exits", 400));
-
-  const token = student.createResetPasswordToken();
-  await student.save({ validateBeforeSave: false });
-
-  const resetUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/students/reset-password/${token}`;
-
-  const message = `You requested for password reset. Go to this link for resetting password: ${resetUrl} If you didn't request for this then simply ignore this email.`;
-
-  try {
-    await sendMail({
-      email,
-      subject: "Reset your password (Valid for 10 minutes only)",
-      message,
-    });
+    user.password = newPassword;
+    user.passwordConfirm = newPasswordConfirm;
+    await user.save();
 
     res.status(200).json({
       status: "success",
-      message: "Check your email for resetting password",
+      message: "Password changed successfully",
     });
-  } catch (err) {
-    student.resetPasswordToken = undefined;
-    student.resetPasswordTokenExpiresIn = undefined;
-    await student.save({ validateBeforeSave: false });
-
-    return next(
-      new AppError("An error occured while sending email. Try again later")
-    );
-  }
-});
-
-export const resetPassword = catchAsync(async (req, res, next) => {
-  const { password, passwordConfirm } = req.body;
-
-  const resetToken = crypto
-    .createHash("sha256")
-    .update(req.params.token)
-    .digest("hex");
-
-  const student = await Student.findOne({
-    resetPasswordToken: resetToken,
-    resetPasswordTokenExpiresIn: { $gt: Date.now() },
   });
 
-  if (!student) {
-    return next(new AppError("No such student exists or token expired"));
-  }
+export const forgotPassword = (Model, modelName) =>
+  catchAsync(async (req, res, next) => {
+    const { email } = req.body;
 
-  student.password = password;
-  student.passwordConfirm = passwordConfirm;
-  student.resetPasswordToken = undefined;
-  student.resetPasswordTokenExpiresIn = undefined;
-  await student.save();
+    const user = await Model.findOne({ email });
 
-  const token = signToken(student._id, res);
-  res.status(200).json({
-    message: "success",
-    token,
+    if (!user) return next(new AppError("No user with this email exits", 400));
+
+    const token = user.createResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+
+    const resetUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/${modelName}/reset-password/${token}`;
+
+    const message = `You requested for password reset. Go to this link for resetting password: ${resetUrl} If you didn't request for this then simply ignore this email.`;
+
+    try {
+      await sendMail({
+        email,
+        subject: "Reset your password (Valid for 10 minutes only)",
+        message,
+      });
+
+      res.status(200).json({
+        status: "success",
+        message: "Check your email for resetting password",
+      });
+    } catch (err) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordTokenExpiresIn = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return next(
+        new AppError("An error occured while sending email. Try again later")
+      );
+    }
   });
-});
+
+export const resetPassword = (Model) =>
+  catchAsync(async (req, res, next) => {
+    const { password, passwordConfirm } = req.body;
+
+    const resetToken = crypto
+      .createHash("sha256")
+      .update(req.params.token)
+      .digest("hex");
+
+    const user = await Model.findOne({
+      resetPasswordToken: resetToken,
+      resetPasswordTokenExpiresIn: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return next(new AppError("No such user exists or token expired"));
+    }
+
+    user.password = password;
+    user.passwordConfirm = passwordConfirm;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpiresIn = undefined;
+    await user.save();
+
+    const token = signToken(user._id, res);
+    res.status(200).json({
+      message: "success",
+      token,
+    });
+  });
