@@ -19,6 +19,7 @@ const studentSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "student",
+      select: false,
     },
     photo: {
       type: String,

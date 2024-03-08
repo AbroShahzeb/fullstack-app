@@ -98,3 +98,14 @@ export const restrictTo = (...roles) => {
     next();
   };
 };
+
+export const getAllStudents = catchAsync(async (req, res, next) => {
+  const students = await Student.find().select("-__v");
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      students,
+    },
+  });
+});
