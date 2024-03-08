@@ -71,7 +71,7 @@ export const protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  const decoded = promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
   const currentStudent = await Student.findById(decoded.id);
 
@@ -107,5 +107,33 @@ export const getAllStudents = catchAsync(async (req, res, next) => {
     data: {
       students,
     },
+  });
+});
+
+export const changePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword, newPasswordConfirm } = req.body;
+
+  // Match the current password
+  const student = await Student.findById(req.student._id).select("+password");
+
+  if (!student) {
+    return next(
+      new AppError("You are not logged in. Login to change password", 401)
+    );
+  }
+
+  console.log("Current password", currentPassword);
+  console.log("Student Password", student.password);
+  if (!(await student.arePasswordsEqual(currentPassword, student.password))) {
+    return next(new AppError("Your current password is wrong", 400));
+  }
+
+  student.password = newPassword;
+  student.passwordConfirm = newPasswordConfirm;
+  await student.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Password changed successfully",
   });
 });
