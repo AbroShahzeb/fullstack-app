@@ -7,10 +7,14 @@ import {
   getAllStudents,
   changePassword,
   protect,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/authController.js";
 
 router.post("/signup", signup);
 router.post("/login", login);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 router.post("/change-password", protect, changePassword);
 

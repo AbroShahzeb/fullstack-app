@@ -3,6 +3,9 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import jwt from "jsonwebtoken";
 import { promisify } from "util";
+import { sendMail } from "../utils/email.js";
+import crypto from "crypto";
+import student from "../models/studentModel.js";
 
 const signToken = (id, res) => {
   const token = jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -122,8 +125,6 @@ export const changePassword = catchAsync(async (req, res, next) => {
     );
   }
 
-  console.log("Current password", currentPassword);
-  console.log("Student Password", student.password);
   if (!(await student.arePasswordsEqual(currentPassword, student.password))) {
     return next(new AppError("Your current password is wrong", 400));
   }
@@ -135,5 +136,73 @@ export const changePassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     message: "Password changed successfully",
+  });
+});
+
+export const forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+
+  const student = await Student.findOne({ email });
+
+  if (!student) return next(new AppError("No user with this email exits", 400));
+
+  const token = student.createResetPasswordToken();
+  await student.save({ validateBeforeSave: false });
+
+  const resetUrl = `${req.protocol}://${req.get(
+    "host"
+  )}/api/v1/students/reset-password/${token}`;
+
+  const message = `You requested for password reset. Go to this link for resetting password: ${resetUrl} If you didn't request for this then simply ignore this email.`;
+
+  try {
+    await sendMail({
+      email,
+      subject: "Reset your password (Valid for 10 minutes only)",
+      message,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Check your email for resetting password",
+    });
+  } catch (err) {
+    student.resetPasswordToken = undefined;
+    student.resetPasswordTokenExpiresIn = undefined;
+    await student.save({ validateBeforeSave: false });
+
+    return next(
+      new AppError("An error occured while sending email. Try again later")
+    );
+  }
+});
+
+export const resetPassword = catchAsync(async (req, res, next) => {
+  const { password, passwordConfirm } = req.body;
+
+  const resetToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const student = await Student.findOne({
+    resetPasswordToken: resetToken,
+    resetPasswordTokenExpiresIn: { $gt: Date.now() },
+  });
+
+  if (!student) {
+    return next(new AppError("No such student exists or token expired"));
+  }
+
+  student.password = password;
+  student.passwordConfirm = passwordConfirm;
+  student.resetPasswordToken = undefined;
+  student.resetPasswordTokenExpiresIn = undefined;
+  await student.save();
+
+  const token = signToken(student._id, res);
+  res.status(200).json({
+    message: "success",
+    token,
   });
 });

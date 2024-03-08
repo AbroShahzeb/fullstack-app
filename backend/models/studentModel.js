@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 const studentSchema = new mongoose.Schema(
   {
@@ -41,6 +42,8 @@ const studentSchema = new mongoose.Schema(
       },
     },
     passwordChangedAt: Date,
+    resetPasswordToken: String,
+    resetPasswordTokenExpiresIn: Date,
   },
   {
     timestamps: true,
@@ -80,6 +83,17 @@ studentSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
     return JWTTimestamp < passwordChangeTime;
   }
   return false;
+};
+
+studentSchema.methods.createResetPasswordToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+  this.resetPasswordTokenExpiresIn = Date.now() + 10 * 60 * 1000;
+
+  return token;
 };
 
 const student = mongoose.model("Student", studentSchema);
