@@ -44,12 +44,18 @@ const studentSchema = new mongoose.Schema(
     passwordChangedAt: Date,
     resetPasswordToken: String,
     resetPasswordTokenExpiresIn: Date,
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
   },
   {
     timestamps: true,
   }
 );
 
+// Document middlewares
 studentSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -67,6 +73,7 @@ studentSchema.pre("save", function (next) {
   next();
 });
 
+// Document functions/methods
 studentSchema.methods.arePasswordsEqual = async function (
   candidatePassword,
   hashedPassword
@@ -95,6 +102,12 @@ studentSchema.methods.createResetPasswordToken = function () {
 
   return token;
 };
+
+// Query Middleware(s)
+studentSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 const student = mongoose.model("Student", studentSchema);
 export default student;
