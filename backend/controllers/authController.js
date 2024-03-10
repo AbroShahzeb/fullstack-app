@@ -1,5 +1,3 @@
-import Student from "../models/studentModel.js";
-import Teacher from "../models/teacherModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import jwt from "jsonwebtoken";
@@ -62,6 +60,7 @@ export const login = (Model) =>
 
 export const protect = (Model) =>
   catchAsync(async (req, res, next) => {
+    console.log("I am here!");
     let token;
 
     if (
@@ -78,11 +77,10 @@ export const protect = (Model) =>
     }
 
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
     const currentUser = await Model.findById(decoded.id);
 
     if (!currentUser) {
-      return next(new AppError("Student belonging to token does not exit"));
+      return next(new AppError("User belonging to token does not exit"));
     }
 
     if (currentUser.changedPasswordAfter(decoded.iat)) {
