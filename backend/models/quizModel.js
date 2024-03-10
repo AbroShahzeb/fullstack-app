@@ -38,5 +38,10 @@ const quizSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+quizSchema.pre(/^find/, function (next) {
+  this.populate("questions");
+  next();
+});
+
 const Quiz = mongoose.model("Quiz", quizSchema);
 export default Quiz;

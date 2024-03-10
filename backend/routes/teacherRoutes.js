@@ -14,13 +14,19 @@ import {
 
 import { getMe, updateMe, deleteMe } from "../controllers/userController.js";
 
-import { createQuiz } from "../controllers/quizController.js";
+import { createQuiz, getMyQuizzes } from "../controllers/quizController.js";
 
 router.post(
   "/create-quiz",
   protect(Teacher),
   restrictTo("teacher"),
   createQuiz
+);
+router.get(
+  "/:teacherId/my-quizzes",
+  protect(Teacher),
+  restrictTo("teacher"),
+  getMyQuizzes
 );
 router.post("/signup", signup(Teacher));
 router.post("/login", login(Teacher));
