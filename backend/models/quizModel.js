@@ -38,10 +38,14 @@ const quizSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-quizSchema.pre(/^find/, function (next) {
-  this.populate("questions");
-  next();
-});
+quizSchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  async function (next) {
+    await this.constructor.deleteMany({ _id: { $in: this.questions } });
+    next();
+  }
+);
 
 const Quiz = mongoose.model("Quiz", quizSchema);
 export default Quiz;

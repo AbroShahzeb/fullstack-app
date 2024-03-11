@@ -77,7 +77,6 @@ export const protect = (Model) =>
 
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
     const currentUser = await Model.findById(decoded.id).select("+role");
-
     if (!currentUser) {
       return next(new AppError("User belonging to token does not exit"));
     }

@@ -14,7 +14,11 @@ import {
 
 import { getMe, updateMe, deleteMe } from "../controllers/userController.js";
 
-import { createQuiz, getMyQuizzes } from "../controllers/quizController.js";
+import {
+  createQuiz,
+  getMyQuizzes,
+  deleteQuiz,
+} from "../controllers/quizController.js";
 
 router.post(
   "/create-quiz",
@@ -32,6 +36,13 @@ router.post("/signup", signup(Teacher));
 router.post("/login", login(Teacher));
 router.post("/forgot-password", forgotPassword(Teacher, "teachers"));
 router.post("/reset-password/:token", resetPassword(Teacher));
+
+router.delete(
+  "/quizzes/:id",
+  protect(Teacher),
+
+  deleteQuiz
+);
 
 router.post("/change-password", protect, changePassword(Teacher));
 
