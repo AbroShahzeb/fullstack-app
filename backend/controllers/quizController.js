@@ -14,6 +14,7 @@ export const createQuiz = catchAsync(async (req, res, next) => {
     difficultyLevel,
   } = req.body;
 
+  // sending all requests at one using Promise.all
   const questionIds = await Promise.all(
     questions.map(async (currentQuestion) => {
       const { question, options, correctOption, timeToAnswer } =
