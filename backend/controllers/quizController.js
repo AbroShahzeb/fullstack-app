@@ -47,7 +47,7 @@ export const createQuiz = catchAsync(async (req, res, next) => {
 });
 
 export const getMyQuizzes = catchAsync(async (req, res, next) => {
-  const quizzes = await Quiz.find({ createdBy: req.params.teacherId });
+  const quizzes = await Quiz.find({ createdBy: req.user.id });
   res.status(200).json({
     status: "success",
     data: {

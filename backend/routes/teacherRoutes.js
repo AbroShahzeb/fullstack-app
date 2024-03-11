@@ -23,7 +23,7 @@ router.post(
   createQuiz
 );
 router.get(
-  "/:teacherId/my-quizzes",
+  "/my-quizzes",
   protect(Teacher),
   restrictTo("teacher"),
   getMyQuizzes
