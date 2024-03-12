@@ -101,3 +101,78 @@ export const goToNextQuestion = catchAsync(async (req, res, next) => {
     nextQuestion: nextQuestion,
   });
 });
+
+export const joinLiveQuiz = catchAsync(async (req, res, next) => {
+  const { studentId } = req.body;
+  const quizId = req.params.id;
+
+  const quiz = await Quiz.findById(quizId).select(
+    "currentlyBeingTakenBy isLive"
+  );
+
+  if (!quiz.isLive) {
+    return next(new AppError("Quiz is not live yet. You cannot join"));
+  }
+
+  let isStudentAlreadyJoined = false;
+  quiz.currentlyBeingTakenBy.forEach((student) => {
+    if (student._id.toString() === studentId) {
+      isStudentAlreadyJoined = true;
+      return;
+    }
+  });
+
+  if (isStudentAlreadyJoined) {
+    return next(
+      new AppError("You are already joined to the quiz. You cannot join again")
+    );
+  }
+  quiz.currentlyBeingTakenBy.push(studentId);
+  await quiz.save();
+
+  const currentStudents = await Quiz.findById(quizId)
+    .select("currentlyBeingTakenBy")
+    .populate({ path: "currentlyBeingTakenBy", select: "name photo" });
+
+  res.status(200).json({
+    status: "success",
+    currentStudents: currentStudents.currentlyBeingTakenBy,
+  });
+});
+
+export const startLiveQuiz = catchAsync(async (req, res, next) => {
+  const quiz = await Quiz.findById(req.params.id);
+  quiz.isLive = true;
+  await quiz.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Quiz is live",
+  });
+});
+
+export const finishLiveQuiz = catchAsync(async (req, res, next) => {
+  const quiz = await Quiz.findById(req.params.id);
+  quiz.isLive = false;
+  quiz.currentlyBeingTakenBy = [];
+  await quiz.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Quiz has finished",
+  });
+});
+
+export const leaveLiveQuiz = catchAsync(async (req, res, next) => {
+  const { studentId } = req.params;
+  const quiz = await Quiz.findById(req.params.id);
+  quiz.currentlyBeingTakenBy = quiz.currentlyBeingTakenBy.filter(
+    (student) => student._id.toString() !== studentId
+  );
+  await quiz.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Quiz left successfully",
+  });
+});

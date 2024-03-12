@@ -20,6 +20,10 @@ const quizSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: "Teacher",
     },
+    isLive: {
+      type: Boolean,
+      default: false,
+    },
     currentlyBeingTakenBy: [
       {
         type: mongoose.Schema.ObjectId,

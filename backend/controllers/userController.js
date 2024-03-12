@@ -15,6 +15,7 @@ export const getMe = (req, res, next) => {
     status: "success",
     data: {
       user: {
+        id: req.user._id,
         name: req.user.name,
         email: req.user.email,
         photo: req.user.photo,

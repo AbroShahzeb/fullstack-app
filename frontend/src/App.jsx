@@ -64,15 +64,17 @@ function App() {
       </button>
       <button onClick={handleNextQuestion}>Get next question</button>
 
-      <h2>Question</h2>
-      <p>{nextQuestion?.question}</p>
-      <ol>
-        {nextQuestion?.options?.map((option) => (
-          <li>{option}</li>
-        ))}
-      </ol>
+      <div>
+        <h2>Question</h2>
+        <p>{nextQuestion?.question}</p>
+        <ol>
+          {nextQuestion?.options?.map((option, index) => (
+            <li key={index}>{option}</li>
+          ))}
+        </ol>
 
-      <p>Correct option: {nextQuestion?.correctOption}</p>
+        <p>Answer: {nextQuestion?.correctOption}</p>
+      </div>
     </div>
   );
 }

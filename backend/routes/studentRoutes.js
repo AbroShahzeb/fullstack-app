@@ -22,9 +22,9 @@ router.post("/reset-password/:token", resetPassword(Student));
 
 router.post("/change-password", protect, changePassword(Student));
 
-router.get("/me", protect, getMe);
-router.patch("/update-me", protect, updateMe(Student));
-router.delete("/delete-me", protect, deleteMe(Student));
+router.get("/me", protect(Student), getMe);
+router.patch("/update-me", protect(Student), updateMe(Student));
+router.delete("/delete-me", protect(Student), deleteMe(Student));
 
 // router.get("/", getAllStudents);
 
