@@ -4,8 +4,23 @@ import { useState, useEffect } from "react";
 let socket;
 
 function App() {
-  const [message, setMessage] = useState("");
+  const [timeToAnswer, setTimeToAnswer] = useState(undefined);
   const [nextQuestion, setNextQuestion] = useState({});
+  const [currentQueIndex, setCurrentQueIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(function () {
+      if (timeToAnswer > 0) setTimeToAnswer(timeToAnswer - 1);
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [timeToAnswer]);
+
+  useEffect(() => {
+    if (timeToAnswer === 0) {
+      handleNextQuestion();
+    }
+  }, [timeToAnswer]);
 
   useEffect(() => {
     socket = io("http://localhost:8000");
@@ -43,14 +58,16 @@ function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          queIndex: 0,
+          queIndex: currentQueIndex - 1,
         }),
       }
     );
 
-    const data = await res.json();
+    console.log(currentQueIndex);
 
-    socket.on("next-question", (data) => setNextQuestion(data));
+    const data = await res.json();
+    setCurrentQueIndex(currentQueIndex + 1);
+    setTimeToAnswer(data.nextQuestion.timeToAnswer);
     console.log(data);
   }
   return (
@@ -66,6 +83,10 @@ function App() {
 
       <div>
         <h2>Question</h2>
+        <p>
+          Time:{" "}
+          {timeToAnswer < 10 ? "00:0" + timeToAnswer : "00:" + timeToAnswer}
+        </p>
         <p>{nextQuestion?.question}</p>
         <ol>
           {nextQuestion?.options?.map((option, index) => (

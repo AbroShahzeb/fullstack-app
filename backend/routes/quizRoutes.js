@@ -18,4 +18,5 @@ router.post("/:id/start-live-quiz", startLiveQuiz);
 router.post("/:id/finish-live-quiz", finishLiveQuiz);
 
 router.post("/:id/leave-live-quiz", leaveLiveQuiz);
+
 export default router;
