@@ -10,13 +10,20 @@ const signToken = (id, res) => {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-  res.cookie("jwt", token);
+  res.cookie("jwt", token, {
+    maxAge: 90 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: false,
+  });
   return token;
 };
 
 export const signup = (Model) =>
   catchAsync(async (req, res, next) => {
     const { name, email, password, passwordConfirm } = req.body;
+
+    const JWTCookie = req.cookies.jwt;
+    console.log(JWTCookie);
 
     const newDocument = await Model.create({
       name,
@@ -27,6 +34,11 @@ export const signup = (Model) =>
 
     const token = signToken(newDocument._id, res);
 
+    res.cookie("jwt", token, {
+      maxAge: 90 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: false,
+    });
     res.status(201).json({
       status: "success",
       token,
