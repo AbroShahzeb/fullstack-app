@@ -12,14 +12,14 @@ const handleCastError = (err) => {
 };
 
 const handleDuplicateRecordDB = (err) => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  // const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
   const dupField = Object.keys(err.keyValue)[0];
 
   let message;
 
   if (dupField === "email")
     message = `User with this email already exits. Please try another one.`;
-  else message = `Duplidate field value: ${value}. Please use another value`;
+  else message = `Duplidate field value. Please use another value`;
 
   return new AppError(message, 400);
 };
