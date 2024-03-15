@@ -14,10 +14,10 @@ function Register() {
 
   return (
     <main className="w-full h-screen flex items-start justify-center px-4">
-      <div className="w-96 flex flex-col gap-8 items-center  mt-8 sm:mt-16 font-primary relative">
-        <div className="absolute top-0 -left-20 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply"></div>
-        <div className="absolute top-0 -right-4 w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply"></div>
-        <div className="absolute left-20 top-8 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply"></div>
+      <div className="w-96 flex flex-col gap-8 items-center  mt-8 sm:mt-16 font-primary relative ">
+        <div className="absolute top-0 -left-20 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply  animate-blob blur-xl "></div>
+        <div className="absolute top-0 -right-4 w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply  animate-blob animation-delay-2000 blur-xl"></div>
+        <div className="absolute left-20 top-8 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply  animate-blob animation-delay-4000 blur-xl"></div>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="w-full  px-6 py-8 rounded-md shadow-md flex flex-col gap-3 relative z-100 bg-white"
