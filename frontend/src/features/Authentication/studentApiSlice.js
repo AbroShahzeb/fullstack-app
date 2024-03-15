@@ -1,10 +1,10 @@
-import { apiSlice } from "./apiSlice";
+import { apiSlice } from "../../apiSlice";
 
 const STUDENT_URL = "/api/v1/students";
 
 const studentApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    register: builder.mutation({
+    registerStudent: builder.mutation({
       query: (data) => ({
         url: `${STUDENT_URL}/signup`,
         method: "POST",
@@ -14,4 +14,4 @@ const studentApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useRegisterMutation } = studentApiSlice;
+export const { useRegisterStudentMutation } = studentApiSlice;

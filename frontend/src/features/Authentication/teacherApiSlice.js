@@ -4,7 +4,7 @@ const TEACHER_URL = "/api/v1/teachers";
 
 const teacherApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    register: builder.mutation({
+    registerTeacher: builder.mutation({
       query: (data) => ({
         url: `${TEACHER_URL}/signup`,
         method: "POST",
@@ -14,4 +14,4 @@ const teacherApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useRegisterMutation } = teacherApiSlice;
+export const { useRegisterTeacherMutation } = teacherApiSlice;
