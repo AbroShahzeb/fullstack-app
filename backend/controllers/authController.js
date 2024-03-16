@@ -22,9 +22,6 @@ export const signup = (Model) =>
   catchAsync(async (req, res, next) => {
     const { name, email, password, passwordConfirm } = req.body;
 
-    const JWTCookie = req.cookies.jwt;
-    console.log(JWTCookie);
-
     const newDocument = await Model.create({
       name,
       email,
@@ -112,17 +109,6 @@ export const restrictTo = (...roles) => {
     next();
   };
 };
-
-// export const getAllStudents = catchAsync(async (req, res, next) => {
-//   const students = await Student.find().select("-__v");
-
-//   res.status(200).json({
-//     status: "success",
-//     data: {
-//       students,
-//     },
-//   });
-// });
 
 export const changePassword = (Model) =>
   catchAsync(async (req, res, next) => {
