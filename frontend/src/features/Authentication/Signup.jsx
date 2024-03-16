@@ -29,25 +29,18 @@ function Register({ user }) {
 
   async function onSubmit(data) {
     try {
-      console.log(JSON.stringify(data));
-      // setMessage("");
-      // let res;
-      // if (user === "Student") res = await registerStudent(data).unwrap();
-      // else if (user === "Teacher") res = await registerTeacher(data).unwrap();
-      // if (res.status === "success") setMessage("Account created successfully");
-      // else setMessage("");
-      const res = await fetch("http://localhost:8000/api/v1/students/signup", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-      const Resdata = await res.json();
-      console.log(Resdata);
+      setMessage("");
+      let res;
+      if (user === "Student") res = await registerStudent(data).unwrap();
+      else if (user === "Teacher") res = await registerTeacher(data).unwrap();
+
+      if (res.status === "success") setMessage("Account created successfully");
+      else setMessage("");
+
       reset();
     } catch (err) {
       console.log(err);
+      setMessage(err?.data?.message);
     }
   }
 
