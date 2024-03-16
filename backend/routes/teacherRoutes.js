@@ -34,7 +34,7 @@ router.get(
 );
 router.post("/signup", signup(Teacher));
 router.post("/login", login(Teacher));
-router.post("/forgot-password", forgotPassword(Teacher, "teachers"));
+router.post("/forgot-password", forgotPassword(Teacher, "teacher"));
 router.post("/reset-password/:token", resetPassword(Teacher));
 
 router.delete(

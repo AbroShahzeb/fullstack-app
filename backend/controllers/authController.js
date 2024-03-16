@@ -150,7 +150,9 @@ export const forgotPassword = (Model, modelName) =>
 
     const resetUrl = `${req.protocol}://${req.get(
       "host"
-    )}/api/v1/${modelName}/reset-password/${token}`;
+    )}/reset-password/${modelName}/${token}`;
+
+    console.log("Reset URL", resetUrl);
 
     const message = `You requested for password reset. Go to this link for resetting password: ${resetUrl} If you didn't request for this then simply ignore this email.`;
 
@@ -178,8 +180,7 @@ export const forgotPassword = (Model, modelName) =>
 
 export const resetPassword = (Model) =>
   catchAsync(async (req, res, next) => {
-    const { password, passwordConfirm } = req.body;
-
+    const { password, passwordConfirm } = req.body.body;
     const resetToken = crypto
       .createHash("sha256")
       .update(req.params.token)
@@ -202,7 +203,7 @@ export const resetPassword = (Model) =>
 
     const token = signToken(user._id, res);
     res.status(200).json({
-      message: "success",
+      status: "success",
       token,
     });
   });
