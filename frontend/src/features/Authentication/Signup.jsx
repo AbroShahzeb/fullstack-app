@@ -19,8 +19,6 @@ function Register({ user }) {
     reset,
   } = useForm();
 
-  console.log(user);
-
   const [registerStudent, { isLoading: isLoadingStudent }] =
     useRegisterStudentMutation();
   const [registerTeacher, { isLoading: isLoadingTeacher }] =
