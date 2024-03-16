@@ -5,11 +5,13 @@ import { connectDB } from "./backend/utils/db.js";
 
 import app from "./backend/app.js";
 
-connectDB();
+let server;
+connectDB().then(() => {
+  server = app.listen(process.env.PORT, () =>
+    console.log("Server is running...")
+  );
+});
 
-const server = app.listen(process.env.PORT, () =>
-  console.log("Server is running...")
-);
 export const socket = new Server(server, {
   cors: "*",
 });
