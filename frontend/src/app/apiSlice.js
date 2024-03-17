@@ -1,9 +1,9 @@
 import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 
-const baseQuery = fetchBaseQuery({ baseUrl: "https://quizzy.cyclic.app" });
+const baseQuery = fetchBaseQuery({ baseUrl: "https://quizzy.cyclic.sh" });
 
 export const apiSlice = createApi({
   baseQuery,
-  tagTypes: ["User"],
+  tagTypes: ["Teacher", "Student"],
   endpoints: (builder) => ({}),
 });

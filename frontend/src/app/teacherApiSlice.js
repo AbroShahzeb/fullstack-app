@@ -1,4 +1,4 @@
-import { apiSlice } from "../../apiSlice";
+import { apiSlice } from "./apiSlice";
 
 const TEACHER_URL = "/api/v1/teachers";
 
@@ -10,6 +10,7 @@ const teacherApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Teacher"],
     }),
     loginTeacher: builder.mutation({
       query: (data) => ({
@@ -17,6 +18,12 @@ const teacherApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+
+      invalidatesTags: ["Teacher"],
+
+      optimisticUpdate: (draft, { postId }) => {
+        console.log(draft);
+      },
     }),
     forgotPasswordTeacher: builder.mutation({
       query: (data) => ({

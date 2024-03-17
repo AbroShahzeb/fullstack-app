@@ -2,21 +2,21 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 
-import { useResetPasswordTeacherMutation } from "./teacherApiSlice";
-import { useResetPasswordStudentMutation } from "./studentApiSlice";
+import { useResetPasswordTeacherMutation } from "../../app/teacherApiSlice";
+import { useResetPasswordStudentMutation } from "../../app/studentApiSlice";
 import BlobAnimation from "../../ui/BlobAnimation";
 import FormMessage from "../../ui/Form/FormMessage";
 import InputField from "../../ui/Form/inputField";
 import InputLabel from "../../ui/Form/InputLabel";
 import InputError from "../../ui/Form/InputError";
 import FormField from "../../ui/Form/FormField";
+import AppLayout from "../../ui/AppLayout";
 
 const fieldNames = ["password", "passwordConfirm"];
 
 function ResetPassword({ user }) {
   const { token } = useParams();
 
-  console.log(token);
   const {
     register,
     handleSubmit,
@@ -43,8 +43,6 @@ function ResetPassword({ user }) {
       else if (user === "Teacher")
         res = await resetPasswordTeacher(reqBody).unwrap();
 
-      console.log(res);
-
       if (res.status === "success") setMessage("Password reset successfully");
       else setMessage("");
 
@@ -55,10 +53,10 @@ function ResetPassword({ user }) {
   }
 
   return (
-    <main className="w-full h-screen flex items-start justify-center px-4">
-      <div className="w-96 flex flex-col gap-8 items-center  mt-8 sm:mt-16 font-primary relative ">
+    <AppLayout>
+      <div className="w-full xs:w-96 flex flex-col gap-8 items-center  mt-8 sm:mt-16 font-primary relative ">
         <BlobAnimation />
-        <div className="relative w-full">
+        <div className="relative xs:w-full">
           <div className="absolute -inset-[5px] blur-lg opacity-50 rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500  sm:hidden"></div>
 
           <form
@@ -97,7 +95,7 @@ function ResetPassword({ user }) {
           </form>
         </div>
       </div>
-    </main>
+    </AppLayout>
   );
 }
 

@@ -1,4 +1,4 @@
-import { apiSlice } from "../../apiSlice";
+import { apiSlice } from "./apiSlice";
 
 const STUDENT_URL = "/api/v1/students";
 

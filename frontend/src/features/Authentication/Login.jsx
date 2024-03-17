@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
-import { useLoginTeacherMutation } from "./teacherApiSlice";
-import { useLoginStudentMutation } from "./studentApiSlice";
+import { useLoginTeacherMutation } from "../../app/teacherApiSlice";
+import { useLoginStudentMutation } from "../../app/studentApiSlice";
 import { useState } from "react";
 import BlobAnimation from "../../ui/BlobAnimation";
 import FormMessage from "../../ui/Form/FormMessage";
@@ -8,6 +8,7 @@ import InputField from "../../ui/Form/inputField";
 import InputLabel from "../../ui/Form/InputLabel";
 import InputError from "../../ui/Form/InputError";
 import FormField from "../../ui/Form/FormField";
+import AppLayout from "../../ui/AppLayout";
 
 const fieldNames = ["email", "password"];
 
@@ -42,10 +43,10 @@ function Login({ user }) {
   }
 
   return (
-    <main className="w-full h-screen flex items-start justify-center px-4">
-      <div className="w-96 flex flex-col gap-8 items-center  mt-8 sm:mt-16 font-primary relative ">
+    <AppLayout>
+      <div className="w-full xs:w-96 flex flex-col gap-8 items-center  mt-8 sm:mt-16 font-primary relative ">
         <BlobAnimation />
-        <div className="relative w-full">
+        <div className="relative xs:w-full">
           <div className="absolute -inset-[5px] blur-lg opacity-50 rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500  sm:hidden"></div>
 
           <form
@@ -84,7 +85,7 @@ function Login({ user }) {
           </form>
         </div>
       </div>
-    </main>
+    </AppLayout>
   );
 }
 
